@@ -149,7 +149,7 @@ func (s *Service) acceptRequest(req *livekit.StartEgressRequest) bool {
 		}
 	}
 
-	if !sysload.CanAcceptRequest(req) {
+	if !sysload.CanAcceptRequest(s.conf, req) {
 		logger.Debugw("rejecting request", "reason", "not enough cpu")
 		return false
 	}
@@ -163,7 +163,7 @@ func (s *Service) acceptRequest(req *livekit.StartEgressRequest) bool {
 		return false
 	}
 
-	sysload.AcceptRequest(req)
+	sysload.AcceptRequest(s.conf, req)
 	logger.Debugw("request claimed", "egressID", req.EgressId)
 
 	return true

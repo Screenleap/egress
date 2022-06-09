@@ -9,15 +9,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/atomic"
 
+	"github.com/livekit/egress/pkg/config"
 	"github.com/livekit/protocol/logger"
 
 	"github.com/livekit/protocol/livekit"
-)
-
-const (
-	minIdleRoomComposite  = 3
-	minIdleTrackComposite = 2
-	minIdleTrack          = 1
 )
 
 var (
@@ -78,32 +73,32 @@ func GetCPULoad() float64 {
 	return (numCPUs - idleCPUs.Load()) / numCPUs * 100
 }
 
-func CanAcceptRequest(req *livekit.StartEgressRequest) bool {
+func CanAcceptRequest(conf *config.Config, req *livekit.StartEgressRequest) bool {
 	accept := false
 	available := idleCPUs.Load() - pendingCPUs.Load()
 
 	switch req.Request.(type) {
 	case *livekit.StartEgressRequest_RoomComposite:
-		accept = available > minIdleRoomComposite
+		accept = available > conf.MinIdleCPURoomComposite
 	case *livekit.StartEgressRequest_TrackComposite:
-		accept = available > minIdleTrackComposite
+		accept = available > conf.MinIdleCPUTrackComposite
 	case *livekit.StartEgressRequest_Track:
-		accept = available > minIdleTrack
+		accept = available > conf.MinIdleCPUTrack
 	}
 
 	logger.Debugw("cpu request", "accepted", accept, "availableCPUs", available, "numCPUs", runtime.NumCPU())
 	return accept
 }
 
-func AcceptRequest(req *livekit.StartEgressRequest) {
+func AcceptRequest(conf *config.Config, req *livekit.StartEgressRequest) {
 	var cpuHold float64
 	switch req.Request.(type) {
 	case *livekit.StartEgressRequest_RoomComposite:
-		cpuHold = minIdleRoomComposite
+		cpuHold = conf.MinIdleCPURoomComposite
 	case *livekit.StartEgressRequest_TrackComposite:
-		cpuHold = minIdleTrackComposite
+		cpuHold = conf.MinIdleCPUTrackComposite
 	case *livekit.StartEgressRequest_Track:
-		cpuHold = minIdleTrack
+		cpuHold = conf.MinIdleCPUTrack
 	}
 
 	pendingCPUs.Add(cpuHold)

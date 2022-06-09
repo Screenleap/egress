@@ -145,6 +145,9 @@ prometheus_port: port used to collect prometheus metrics. Used for autoscaling
 log_level: debug, info, warn, or error (default info)
 template_base: can be used to host custom templates (default https://egress-composite.livekit.io)
 insecure: can be used to connect to an insecure websocket (default false)
+min_idle_cpu_room_composite: minimal idle cpu required to start a room composite recording (default 3)
+min_idle_cpu_track_composite: minimal idle cpu required to start a track composite recording (default 2)
+min_idle_cpu_track: minimal idle cpu required to start a track recording (default 1)
 
 # file upload config - only one of the following. Can be overridden 
 s3:

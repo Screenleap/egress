@@ -21,11 +21,14 @@ type Config struct {
 	ApiSecret string      `yaml:"api_secret"` // required (env LIVEKIT_API_SECRET)
 	WsUrl     string      `yaml:"ws_url"`     // required (env LIVEKIT_WS_URL)
 
-	HealthPort     int    `yaml:"health_port"`
-	PrometheusPort int    `yaml:"prometheus_port"`
-	LogLevel       string `yaml:"log_level"`
-	TemplateBase   string `yaml:"template_base"`
-	Insecure       bool   `yaml:"insecure"`
+	HealthPort               int     `yaml:"health_port"`
+	PrometheusPort           int     `yaml:"prometheus_port"`
+	LogLevel                 string  `yaml:"log_level"`
+	TemplateBase             string  `yaml:"template_base"`
+	Insecure                 bool    `yaml:"insecure"`
+	MinIdleCPURoomComposite  float64 `yaml:"min_idle_cpu_room_composite"`  // 3
+	MinIdleCPUTrackComposite float64 `yaml:"min_idle_cpu_track_composite"` // 2
+	MinIdleCPUTrack          float64 `yaml:"min_idle_cpu_track"`           // 1
 
 	S3    *S3Config    `yaml:"s3"`
 	Azure *AzureConfig `yaml:"azure"`
@@ -70,6 +73,10 @@ func NewConfig(confString string) (*Config, error) {
 		ApiSecret:    os.Getenv("LIVEKIT_API_SECRET"),
 		WsUrl:        os.Getenv("LIVEKIT_WS_URL"),
 		NodeID:       utils.NewGuid("NE_"),
+
+		MinIdleCPURoomComposite:  3,
+		MinIdleCPUTrackComposite: 2,
+		MinIdleCPUTrack:          1,
 	}
 	if confString != "" {
 		if err := yaml.Unmarshal([]byte(confString), conf); err != nil {
