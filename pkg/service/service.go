@@ -1,12 +1,12 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"os/exec"
 	"sync"
 	"time"
@@ -197,8 +197,12 @@ func (s *Service) launchHandler(req *livekit.StartEgressRequest) {
 		"--request", string(reqString),
 	)
 	cmd.Dir = "/"
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	var (
+		stdout bytes.Buffer
+		stderr bytes.Buffer
+	)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
 	s.processes.Store(req.EgressId, &process{
 		req: req,
@@ -208,7 +212,7 @@ func (s *Service) launchHandler(req *livekit.StartEgressRequest) {
 
 	err = cmd.Run()
 	if err != nil {
-		logger.Errorw("could not launch handler", err)
+		logger.Errorw("could not launch handler", err, "stdout", stdout.String(), "stderr", stderr.String())
 	}
 }
 
